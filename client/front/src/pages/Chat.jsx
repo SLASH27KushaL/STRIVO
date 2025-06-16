@@ -1,33 +1,44 @@
 import React, { useRef } from 'react';
-import {AppLayout} from '../components/layout/AppLayout.jsx';
 import {
   Box,
-  Stack,
   IconButton,
   TextField,
   Paper,
   Typography,
   Avatar,
-  List,
-  ListItem,
-  ListItemText
+  List
 } from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import SendIcon from '@mui/icons-material/Send';
+import { AppLayout } from '../components/layout/AppLayout';
+import MessageComponent from '../components/shared/MessageComponent';
+import { SampleMessages } from '../assets/SampleMessage';
 
 const Chat = () => {
   const containerRef = useRef(null);
 
   return (
-    <AppLayout>
-      <Stack
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        px: 2,
+        textAlign: 'center',
+        backgroundColor: 'background.default'
+      }}
+    >
+      <Box
         ref={containerRef}
         sx={{
-          flexGrow: 1,
+          width: '100%',
+          maxWidth: '800px',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'flex-end',
-          p: 2,
+          justifyContent: 'space-between',
+          height: '100%',
         }}
       >
         {/* Chat Header */}
@@ -50,19 +61,15 @@ const Chat = () => {
         {/* Chat messages area */}
         <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
           <List>
-            <ListItem>
-              <ListItemText
-                primary="Hello, this is a message from the other side."
-                secondary="10:00 AM"
+            {SampleMessages.map((msg, index) => (
+              <MessageComponent
+                key={index}
+                sender={msg.sender}
+                content={msg.content}
+                timestamp={msg.timestamp}
+                direction={msg.direction}
               />
-            </ListItem>
-            <ListItem sx={{ justifyContent: 'flex-end' }}>
-              <ListItemText
-                primary="Hi! This is your reply."
-                secondary="10:05 AM"
-                sx={{ textAlign: 'right' }}
-              />
-            </ListItem>
+            ))}
           </List>
         </Box>
 
@@ -99,8 +106,8 @@ const Chat = () => {
             <SendIcon />
           </IconButton>
         </Paper>
-      </Stack>
-    </AppLayout>
+      </Box>
+    </Box>
   );
 };
 
