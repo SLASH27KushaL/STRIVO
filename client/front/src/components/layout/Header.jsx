@@ -13,29 +13,26 @@ import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AddIcon from '@mui/icons-material/Add';
 
-import Search from '../specific/Search.jsx'; // ✅ make sure path is correct
-import Notification from '../specific/Notification.jsx'; // ✅ make sure path is correct
+import Search from '../specific/Search.jsx';
+import Notification from '../specific/Notification.jsx';
+import NewGroup from '../specific/NewGroup.jsx'; // Assuming you have a NewGroup component
 const Header = () => {
   const [hasNotifications, setHasNotifications] = useState(true);
   const [isAddMode, setIsAddMode] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
-  const onNotificationClick = () => {
-    setHasNotifications(prev => !prev);
+ const[isNewGroupOpen, setIsNewGroupOpen] = useState(false);
+  const handleNotificationClick = () => {
     setIsNotificationOpen(true);
+    setHasNotifications(false); // Clear badge after opening
   };
 
-  const onAddClick = () => {
+  const handleAddClick = () => {
     setIsAddMode(prev => !prev);
   };
 
-  const onSearchClick = () => {
+  const handleSearchClick = () => {
     setIsSearchOpen(true);
-  };
-
-  const handleSearchClose = () => {
-    setIsSearchOpen(false);
   };
 
   return (
@@ -54,28 +51,26 @@ const Header = () => {
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-            <IconButton color="inherit" onClick={onSearchClick}>
+            <IconButton color="inherit" onClick={handleSearchClick}>
               <SearchIcon />
             </IconButton>
 
-            <IconButton color="inherit" onClick={onNotificationClick}>
+            <IconButton color="inherit" onClick={handleNotificationClick}>
               <Badge color="error" variant="dot" invisible={!hasNotifications}>
                 <NotificationsIcon />
               </Badge>
             </IconButton>
 
-            <IconButton color="inherit" onClick={onAddClick} sx={{ ml: 1 }}>
+            <IconButton color="inherit" onClick={() => setIsNewGroupOpen(true)} sx={{ ml: 1 }}>
               <AddIcon />
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
 
-      {/* ✅ Search Dialog Component */}
-      <Search open={isSearchOpen} onClose={handleSearchClose} />
-
-      {/* ✅ Notification Dialog Component */}
+      <Search open={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       <Notification open={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
+      <NewGroup open={isNewGroupOpen} onClose={() => setIsNewGroupOpen(false)} />
     </>
   );
 };

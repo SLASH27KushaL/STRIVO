@@ -88,20 +88,8 @@ export const AppLayout = WrappedComponent => {
           </Split>
         </Box>
 
-        {/* Footer */}
-        <Box
-          component="footer"
-          sx={{
-            py: 2,
-            textAlign: 'center',
-            borderTop: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
-          }}
-        >
-          <Typography variant="body2" color="textSecondary">
-            &copy; {new Date().getFullYear()} Strivo. All rights reserved.
-          </Typography>
-        </Box>
+   
+        
       </Box>
     );
   };
