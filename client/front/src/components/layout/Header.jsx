@@ -12,27 +12,33 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AddIcon from '@mui/icons-material/Add';
+import GroupsIcon from '@mui/icons-material/Groups';
+
+import { useNavigate } from 'react-router-dom'; // <-- Added this import
 
 import Search from '../specific/Search.jsx';
 import Notification from '../specific/Notification.jsx';
-import NewGroup from '../specific/NewGroup.jsx'; // Assuming you have a NewGroup component
+import NewGroup from '../specific/NewGroup.jsx';
+
 const Header = () => {
   const [hasNotifications, setHasNotifications] = useState(true);
-  const [isAddMode, setIsAddMode] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
- const[isNewGroupOpen, setIsNewGroupOpen] = useState(false);
+  const [isNewGroupOpen, setIsNewGroupOpen] = useState(false);
+
+  const navigate = useNavigate(); // <-- Initialize useNavigate
+
   const handleNotificationClick = () => {
     setIsNotificationOpen(true);
-    setHasNotifications(false); // Clear badge after opening
-  };
-
-  const handleAddClick = () => {
-    setIsAddMode(prev => !prev);
+    setHasNotifications(false);
   };
 
   const handleSearchClick = () => {
     setIsSearchOpen(true);
+  };
+
+  const handleGroupsClick = () => {
+    navigate('/groups'); // <-- Navigate to /groups route
   };
 
   return (
@@ -59,6 +65,10 @@ const Header = () => {
               <Badge color="error" variant="dot" invisible={!hasNotifications}>
                 <NotificationsIcon />
               </Badge>
+            </IconButton>
+
+            <IconButton color="inherit" onClick={handleGroupsClick}>
+              <GroupsIcon />
             </IconButton>
 
             <IconButton color="inherit" onClick={() => setIsNewGroupOpen(true)} sx={{ ml: 1 }}>
