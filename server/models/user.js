@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { hash } from "bcrypt";
+import { sendToken } from "../utils/features";
 
 const userSchema = new Schema({
   name: {
@@ -34,5 +35,6 @@ userSchema.pre("save", async function () {
     this.password = await hash(this.password, 10);
   }
 });
+
 
 export const User = mongoose.models.User || mongoose.model("User", userSchema);

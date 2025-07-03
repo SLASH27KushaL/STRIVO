@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import mongoose,{ Schema, models,Types} from "mongoose";
 
 const message_Schema = new Schema({
   
@@ -27,4 +27,4 @@ attachments: {
   }
 }, { timestamps: true });
 
-export const message = models.User || model("User", message_Schema);
+export const message = models.User || mongoose.model("User", message_Schema);
