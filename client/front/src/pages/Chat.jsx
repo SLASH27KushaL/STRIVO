@@ -1,3 +1,4 @@
+// Chat.jsx
 import React, { useRef } from 'react';
 import {
   Box,
@@ -22,12 +23,10 @@ const Chat = () => {
       sx={{
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center',
-        px: 2,
-        textAlign: 'center',
-        backgroundColor: 'background.default'
+        px: { xs: 1, sm: 2 },
+        py: { xs: 2, sm: 3 },
+        bgcolor: 'background.default',
       }}
     >
       <Box
@@ -37,8 +36,11 @@ const Chat = () => {
           maxWidth: '800px',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
           height: '100%',
+          boxShadow: 3,
+          borderRadius: 2,
+          bgcolor: 'background.paper',
+          overflow: 'hidden',
         }}
       >
         {/* Chat Header */}
@@ -46,21 +48,29 @@ const Chat = () => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            mb: 2,
-            px: 1,
-            py: 1,
-            backgroundColor: 'background.paper',
-            borderRadius: 1,
-            boxShadow: 1,
+            px: 2,
+            py: 1.5,
+            borderBottom: theme => `1px solid ${theme.palette.divider}`,
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
           }}
         >
-          <Avatar sx={{ mr: 2 }}>C</Avatar>
-          <Typography variant="h6">Chat Title</Typography>
+          <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>C</Avatar>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Chat Title
+          </Typography>
         </Box>
 
         {/* Chat messages area */}
-        <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
-          <List>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: 'auto',
+            p: 2,
+            backgroundColor: 'background.default',
+          }}
+        >
+          <List sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {SampleMessages.map((msg, index) => (
               <MessageComponent
                 key={index}
@@ -75,18 +85,20 @@ const Chat = () => {
 
         {/* Message input footer */}
         <Paper
-          elevation={4}
           component="form"
-          onSubmit={(e) => {
+          onSubmit={e => {
             e.preventDefault();
             // handle send
           }}
+          elevation={4}
           sx={{
             display: 'flex',
             alignItems: 'center',
-            p: 1,
-            borderRadius: 2,
-            backgroundColor: 'background.paper'
+            px: 1.5,
+            py: 1,
+            borderTop: theme => `1px solid ${theme.palette.divider}`,
+            bgcolor: 'background.paper',
+            gap: 1,
           }}
         >
           <IconButton component="label">
@@ -99,10 +111,9 @@ const Chat = () => {
             variant="outlined"
             size="small"
             fullWidth
-            sx={{ mx: 1 }}
           />
 
-          <IconButton type="submit" color="primary" sx={{ p: '10px' }}>
+          <IconButton type="submit" color="primary" sx={{ p: 1 }}>
             <SendIcon />
           </IconButton>
         </Paper>
@@ -112,4 +123,3 @@ const Chat = () => {
 };
 
 export default AppLayout(Chat);
-

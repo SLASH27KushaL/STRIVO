@@ -1,11 +1,19 @@
+import React from 'react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
-import { CssBaseline } from '@mui/material'; // ✅ Corrected import
+import { CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './components/layout/Theme.js';
 
-createRoot(document.getElementById('root')).render(
+
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
   <StrictMode>
-    <CssBaseline />  {/* ✅ Correct component */}
-    <App />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
   </StrictMode>
 );

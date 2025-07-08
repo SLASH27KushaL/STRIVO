@@ -1,0 +1,1 @@
+//validator function for loginn and sign up pages

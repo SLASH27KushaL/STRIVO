@@ -1,96 +1,81 @@
 import React from 'react';
 import Header from '../layout/Header.jsx';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Paper, useTheme, useMediaQuery } from '@mui/material';
 import ChatList from '../specific/ChatList.jsx';
-import { useParams } from 'react-router-dom';
 import Profile from '../specific/Profile.jsx';
+import { useParams } from 'react-router-dom';
 import Split from 'react-split';
 
-export const AppLayout = WrappedComponent => {
-  return props => {
-    const theme = useTheme();
-    const params = useParams();
-    const chatId = params.chatId || null;
+export const AppLayout = WrappedComponent => props => {
+  const theme = useTheme();
+  const isSm = useMediaQuery(theme.breakpoints.down('sm'));
+  const { chatId } = useParams();
 
-    return (
-      <Box
-        sx={{
-          height: '100vh', // full screen height
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: theme.palette.background.default,
-        }}
-      >
-        {/* Header */}
+  // On small screens: hide side panels
+  const sizes = isSm ? [0, 100, 0] : [20, 60, 20];
+
+  return (
+    <Box
+      sx={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.default',
+      }}
+    >
+      {/* Header with elevation */}
+      <Paper square elevation={4} sx={{ zIndex: 10 }}>
         <Header />
+      </Paper>
 
-        {/* Main Resizable Area */}
-        <Box
-          sx={{
-            flex: 1,
-            minHeight: 0, // allow Split to take full space
-            display: 'flex',
-            '& .gutter': {
-              backgroundColor: '#1e1e2f',
-              cursor: 'col-resize',
-              width: '6px !important',
-            },
-          }}
+      {/* Main split-layout area */}
+      <Box sx={{ flex: 1, minHeight: 0, display: 'flex' }}>
+        <Split
+          sizes={sizes}
+          minSize={isSm ? 0 : 200}
+          gutterSize={0}
+          direction="horizontal"
+          style={{ display: 'flex', width: '100%' }}
         >
-          <Split
-            sizes={[25, 50, 25]}
-            minSize={200}
-            gutterSize={6}
-            direction="horizontal"
-            style={{ display: 'flex', width: '100%' }}
-            gutter={() => {
-              const gutter = document.createElement('div');
-              gutter.className = 'gutter';
-              return gutter;
+          {/* Left Panel */}
+          <Paper
+            square
+            sx={{
+              width: isSm ? 0 : 'auto',
+              p: 2,
+              borderRadius: 0,
+              overflowY: 'auto',
             }}
           >
-            {/* Left Panel */}
-            <Box
-              sx={{
-                bgcolor: theme.palette.grey[100],
-                p: 2,
-                borderRight: `1px solid ${theme.palette.divider}`,
-                overflowY: 'auto',
-                height: '100%',
-              }}
-            >
-              <ChatList />
-            </Box>
+            <ChatList />
+          </Paper>
 
-            {/* Main Panel */}
-            <Box
-              sx={{
-                p: 2,
-                overflowY: 'auto',
-                height: '100%',
-              }}
-            >
-              <WrappedComponent {...props} />
-            </Box>
+          {/* Main Panel */}
+          <Paper
+            square
+            sx={{
+              flexGrow: 1,
+              p: 2,
+              overflowY: 'auto',
+            }}
+          >
+            <WrappedComponent {...props} />
+          </Paper>
 
-            {/* Right Panel */}
-            <Box
-              sx={{
-                bgcolor: theme.palette.grey[100],
-                p: 2,
-                borderLeft: `1px solid ${theme.palette.divider}`,
-                overflowY: 'auto',
-                height: '100%',
-              }}
-            >
-              <Profile />
-            </Box>
-          </Split>
-        </Box>
-
-   
-        
+          {/* Right Panel */}
+          <Paper
+            square
+            sx={{
+              width: isSm ? 0 : 'auto',
+              p: 2,
+              borderRadius: 0,
+              overflowY: 'auto',
+            }}
+          >
+            <Profile />
+          </Paper>
+        </Split>
       </Box>
-    );
-  };
+    </Box>
+  );
 };

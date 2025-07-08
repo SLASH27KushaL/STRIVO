@@ -1,36 +1,47 @@
 import express from 'express';
-import { isAuthenticated } from './middlewares/auth.js';
-import { addMembers, getChatDetails, getMyChats, getMyGroups, leaveGroup, newGroupChat, removeMembers, sendAttachments } from '../controllers/chat_controller.js';
+import { isAuthenticated } from '../middlewares/auth.js';
+import { 
+  addMembers, 
+  deleteChat, 
+  getChatDetails, 
+  getMessages, 
+  getMyChats, 
+  getMyGroups, 
+  leaveGroup, 
+  newGroupChat, 
+  removeMembers, 
+  renameGroup, 
+  searchUser, 
+  sendAttachments 
+} from '../controllers/chat_controller.js';
 import { attachmentsMulter } from '../middlewares/multer.js';
 
+const router = express.Router();
 
-const app=  express.Router();
+// Apply authentication middleware to all routes
+router.use(isAuthenticated);
 
+// Group chat routes
+router.post('/group/new', newGroupChat);
+router.get('/group/my', getMyGroups);
+router.put('/group/addmembers', addMembers);
+router.put('/group/removemember', removeMembers);
+router.put('/group/rename/:id', renameGroup);
+router.delete('/group/leave/:id', leaveGroup);
 
+// Message routes
+router.post('/message', attachmentsMulter, sendAttachments);
+router.get('/message/:id', getMessages);
 
+// Chat routes
+router.route('/chat/:id')
+  .get(getChatDetails)
+  .delete(deleteChat);
 
-// Export the router for use in the main server file
-app.use(isAuthenticated);
-app.post('/new',newGroupChat);
-app.get('/my',getMyChats);
-app.get('/my/groups',getMyGroups);
-app.put('/addMembers',addMembers);
-app.put('/removeMember',removeMembers);
-app.delete('/leave/:id',leaveGroup);
+// Search route
+router.get('/user/search', searchUser);
 
-//send messages
+// User chats
+router.get('/my/chats', getMyChats);
 
-app.post("/message",attachmentsMulter,sendAttachments);
-
-//get messages
-
-
-//get chat details
- app.route("/chat/:id").get(getChatDetails).put().delete();
-//after here user must be logged in
-export default app;
-
-
-
-
-
+export default router;
