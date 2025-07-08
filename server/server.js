@@ -4,12 +4,16 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import user_Route from './routes/user_route.js';
 import { connectDB } from './utils/features.js';
+import { createServer } from 'http';
 import chat_Route from '../server/routes/chat_route.js'
+
+import { Server } from 'socket.io';
 // Load environment variables from .env
 dotenv.config();
 
 const app = express();
-
+const server=createServer(app);
+const io= new Server(server,{});
 // 1) Connect to MongoDB
 connectDB(process.env.MONGO_URI);
 
@@ -33,8 +37,20 @@ app.use('/chat',chat_Route);
 
 // 5) Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
+});
+
+io.on("connection", (socket) => {
+console.log("New user connected");
+
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+
+
+
 });
 
 export default app;

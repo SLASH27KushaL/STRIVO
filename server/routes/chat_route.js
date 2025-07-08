@@ -1,18 +1,22 @@
 import express from 'express';
 import { isAuthenticated } from '../middlewares/auth.js';
 import { 
+    AcceptFriendRequest,
   addMembers, 
   deleteChat, 
   getChatDetails, 
+  GetFriendRequests, 
   getMessages, 
   getMyChats, 
   getMyGroups, 
   leaveGroup, 
   newGroupChat, 
+  RejectFriendRequest, 
   removeMembers, 
   renameGroup, 
   searchUser, 
-  sendAttachments 
+  sendAttachments, 
+  SendFriendRequest
 } from '../controllers/chat_controller.js';
 import { attachmentsMulter } from '../middlewares/multer.js';
 
@@ -43,5 +47,11 @@ router.get('/user/search', searchUser);
 
 // User chats
 router.get('/my/chats', getMyChats);
+
+
+router.post('/friend-request', isAuthenticated, SendFriendRequest);
+router.put('/friend-request/accept', isAuthenticated, AcceptFriendRequest);
+router.put('/friend-request/reject', isAuthenticated, RejectFriendRequest);
+router.get('/friend-requests', isAuthenticated, GetFriendRequests);
 
 export default router;
