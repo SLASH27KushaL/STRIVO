@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import { hash } from "bcrypt";
-import { sendToken } from "../utils/features";
 
 const userSchema = new Schema({
   name: {
@@ -24,6 +23,7 @@ const userSchema = new Schema({
     },
     url: {
       type: String,
+      default:"",
       required: true,
     },
   },

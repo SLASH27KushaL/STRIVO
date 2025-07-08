@@ -2,7 +2,7 @@ import express from 'express';
 import { login, newUser, getMyProfile, logout } from '../controllers/user_controller.js';
 import { SingleAvatar } from '../middlewares/multer.js';
 import { isAuthenticated } from '../middlewares/auth.js';
-import { getAllNotifications } from '../controllers/notification_controller.js'; // import your notification controller
+import { getAllNotifications } from '../controllers/user_controller.js'; // import your notification controller
 
 const app = express.Router();
 

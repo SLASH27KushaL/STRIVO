@@ -1,22 +1,26 @@
-import mongoose,{ Schema, models} from "mongoose";
+// models/request.js
+import mongoose, { Schema } from "mongoose";
 
-const request_Schema = new Schema({
- 
-  status: {
-    type:String,
-    default:"pending",
-   enum:["pending","accepted","rejected"]
-},
-   
-sender: {
-  type:Type.ObjectId,
-  ref:"User"
+const requestSchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "rejected"],
+      default: "pending",
+    },
+    sender: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    receiver: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
-  receiver:{
-  type:ObjectId,
-  ref:"chat"
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-export const request = mongoose.models.request || mongoose.model("User", request_Schema);
- 
+export const Request =
+  mongoose.models.Request || mongoose.model("Request", requestSchema);

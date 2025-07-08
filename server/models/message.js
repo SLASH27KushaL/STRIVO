@@ -1,21 +1,8 @@
-import mongoose,{ Schema, models,Types} from "mongoose";
+// models/message.js
+import mongoose, { Schema, model } from "mongoose";
 
-const message_Schema = new Schema({
-  
-  sender: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required:true
-  },
-  chat: {
-    type: Schema.Types.ObjectId,
-    ref: "chat",
-    required:true,
-  },
-  content:{
-    type:String
-  }, 
-attachments: {
+const attachmentSchema = new Schema(
+  {
     public_id: {
       type: String,
       required: true,
@@ -24,7 +11,30 @@ attachments: {
       type: String,
       required: true,
     },
-  }
-}, { timestamps: true });
+  },
+  { _id: false } // don’t need subdocument IDs here
+);
 
-export const message = models.User || mongoose.model("User", message_Schema);
+const messageSchema = new Schema(
+  {
+    sender: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    chat: {
+      type: Schema.Types.ObjectId,
+      ref: "Chat",
+      required: true,
+    },
+    content: {
+      type: String,
+      trim: true,
+    },
+    attachments: [attachmentSchema],
+  },
+  { timestamps: true }
+);
+
+export const Message =
+  mongoose.models.Message || model("Message", messageSchema);
