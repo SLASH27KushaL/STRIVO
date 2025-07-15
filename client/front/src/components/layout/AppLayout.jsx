@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../layout/Header.jsx';
 import { Box, Paper, useTheme, useMediaQuery } from '@mui/material';
 import ChatList from '../specific/ChatList.jsx';
 import Profile from '../specific/Profile.jsx';
 import { useParams } from 'react-router-dom';
 import Split from 'react-split';
+import { useSocket } from '../../Socket.jsx';
 
 export const AppLayout = WrappedComponent => props => {
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.down('sm'));
   const { chatId } = useParams();
+
+  // Retrieve socket from context
+  const socket = useSocket();
+
+  // Example: join room when chatId changes
+  useEffect(() => {
+    if (chatId) {
+      socket.emit('joinRoom', chatId);
+    }
+    return () => {
+      if (chatId) socket.emit('leaveRoom', chatId);
+    };
+  }, [chatId, socket]);
 
   // On small screens: hide side panels
   const sizes = isSm ? [0, 100, 0] : [20, 60, 20];
@@ -47,7 +61,7 @@ export const AppLayout = WrappedComponent => props => {
               overflowY: 'auto',
             }}
           >
-            <ChatList />
+            <ChatList socket={socket} />
           </Paper>
 
           {/* Main Panel */}
@@ -59,7 +73,7 @@ export const AppLayout = WrappedComponent => props => {
               overflowY: 'auto',
             }}
           >
-            <WrappedComponent {...props} />
+            <WrappedComponent socket={socket} {...props} />
           </Paper>
 
           {/* Right Panel */}
@@ -72,10 +86,12 @@ export const AppLayout = WrappedComponent => props => {
               overflowY: 'auto',
             }}
           >
-            <Profile />
+            <Profile socket={socket} />
           </Paper>
         </Split>
       </Box>
     </Box>
   );
 };
+
+export default AppLayout;

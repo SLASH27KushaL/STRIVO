@@ -1,22 +1,34 @@
+// routes/user.js
 import express from 'express';
-import { login, newUser, getMyProfile, logout } from '../controllers/user_controller.js';
+import { 
+  newUser, 
+  login, 
+  getMyProfile, 
+  logout, 
+  getAllNotifications 
+} from '../controllers/user_controller.js';
 import { SingleAvatar } from '../middlewares/multer.js';
 import { isAuthenticated } from '../middlewares/auth.js';
-import { getAllNotifications } from '../controllers/user_controller.js'; // import your notification controller
 
-const app = express.Router();
+const router = express.Router();
 
-// Public routes
-app.post('/new', SingleAvatar, newUser);
-app.get('/login', login);
+// Public (no token required)
+// Registration: multipart/form-data for avatar upload
+router.post('/register', SingleAvatar, newUser);
 
-// Protected routes (require authentication)
-app.use(isAuthenticated);
+// Login: JSON body
+router.post('/login', login);
 
-app.get('/me', getMyProfile);
-app.get('/logout', logout);
+// From here on out, require a valid JWT
+router.use(isAuthenticated);
 
-// Notifications route (only after authentication)
-app.get('/notifications', getAllNotifications);
+// Get own profile
+router.get('/me', getMyProfile);
 
-export default app;
+// Logout (stateless)
+router.get('/logout', logout);
+
+// Fetch notifications
+router.get('/notifications', getAllNotifications);
+
+export default router;

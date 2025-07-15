@@ -16,25 +16,29 @@ const userSchema = new Schema({
     required: true,
     select: false,
   },
+  bio: {
+    type: String,
+    default: "", // Optional bio field
+  },
   avatar: {
     public_id: {
       type: String,
-      required: true,
+      required: false, // Make optional
+      default: "", // Default to empty string
     },
     url: {
       type: String,
-      default:"",
-      required: true,
+      required: false, // Make optional
+      default: "", // Default to empty string
     },
   },
 }, { timestamps: true });
 
-// ✅ Hash password ONLY if it has been modified
+// Hash password only if it has been modified
 userSchema.pre("save", async function () {
   if (this.isModified("password")) {
     this.password = await hash(this.password, 10);
   }
 });
-
 
 export const User = mongoose.models.User || mongoose.model("User", userSchema);

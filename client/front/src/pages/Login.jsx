@@ -1,6 +1,5 @@
-// src/components/AuthForm.jsx
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -31,8 +30,9 @@ import {
 import { AuthContext } from '../Context/AuthContext';
 
 const AuthForm = () => {
-  const { login, register } = useContext(AuthContext);
+  const { login, signup, loading } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
@@ -46,6 +46,9 @@ const AuthForm = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const theme = useTheme();
+
+  // Where to redirect after auth
+  const from = location.state?.from?.pathname || '/';
 
   const resetForm = () => {
     setFormData({
@@ -61,60 +64,53 @@ const AuthForm = () => {
   };
 
   const handleToggle = () => {
-    setIsLogin((prev) => !prev);
+    setIsLogin(prev => !prev);
     resetForm();
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value, files } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: files ? files[0] : value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
     try {
       if (isLogin) {
-        // Login with username only
+        // just username/password
         await login({
           username: formData.username,
           password: formData.password,
         });
       } else {
-        // Registration validation
+        // confirm match
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords don't match");
-          setSubmitting(false);
           return;
         }
-        
-        // Create FormData for registration
-        const payload = new FormData();
-        payload.append('name', formData.name);
-        payload.append('username', formData.username);
-        payload.append('bio', formData.bio);
-        payload.append('email', formData.email);
-        payload.append('password', formData.password);
-        
-        // Add profile picture if exists
-        if (formData.profilePicture) {
-          payload.append('avatar', formData.profilePicture);
-        }
-        
-        await register(payload);
+
+        // call signup with JS object; context builds the FormData
+        await signup({
+          name:       formData.name,
+          username:   formData.username,
+          bio:        formData.bio,
+          email:      formData.email,
+          password:   formData.password,
+          avatarFile: formData.profilePicture,
+        });
       }
-      
-      // Clear form and navigate to home
+
       resetForm();
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
-      // Handle API errors
-      setError(err.response?.data?.message || err.message || 'Something went wrong');
+      // signup/login throws Error(msg)
+      setError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -140,15 +136,10 @@ const AuthForm = () => {
               backdropFilter: 'blur(12px)',
               borderRadius: 2,
               boxShadow: 3,
-              transition: 'transform 0.3s, box-shadow 0.3s',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: 6,
-              },
+              '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
             }}
           >
             <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-              {/* Header */}
               <Box textAlign="center" mb={4}>
                 <Slide direction="down" in timeout={600}>
                   <Box>
@@ -173,17 +164,14 @@ const AuthForm = () => {
                 </Slide>
               </Box>
 
-              {/* Error Message */}
               {error && (
                 <Typography color="error" align="center" mb={2}>
                   {error}
                 </Typography>
               )}
 
-              {/* Form */}
               <Box component="form" onSubmit={handleSubmit} noValidate>
                 <Stack spacing={3}>
-                  {/* Signup fields */}
                   {!isLogin && (
                     <Slide direction="up" in timeout={500}>
                       <Paper
@@ -195,7 +183,6 @@ const AuthForm = () => {
                         }}
                       >
                         <Grid container spacing={2} alignItems="center">
-                          {/* Avatar upload */}
                           <Grid item xs={4} sm={3} textAlign="center">
                             <Box position="relative" display="inline-block">
                               <Avatar
@@ -208,7 +195,6 @@ const AuthForm = () => {
                                   width: 64,
                                   height: 64,
                                   border: `3px solid ${theme.palette.primary.light}`,
-                                  transition: 'box-shadow 0.3s',
                                   '&:hover': {
                                     boxShadow: `0 0 0 4px ${alpha(
                                       theme.palette.primary.main,
@@ -227,6 +213,7 @@ const AuthForm = () => {
                                   name="profilePicture"
                                   onChange={handleChange}
                                   style={{ display: 'none' }}
+                                  disabled={submitting || loading}
                                 />
                                 <IconButton
                                   component="span"
@@ -237,8 +224,8 @@ const AuthForm = () => {
                                     bgcolor: theme.palette.primary.main,
                                     color: '#fff',
                                     p: 0.5,
-                                    '&:hover': { bgcolor: theme.palette.primary.dark },
                                   }}
+                                  disabled={submitting || loading}
                                 >
                                   <PhotoCameraIcon fontSize="small" />
                                 </IconButton>
@@ -261,6 +248,7 @@ const AuthForm = () => {
                               name="name"
                               value={formData.name}
                               onChange={handleChange}
+                              disabled={submitting || loading}
                               InputProps={{
                                 startAdornment: (
                                   <PersonIcon sx={{ mr: 1, color: 'action.active' }} />
@@ -275,9 +263,12 @@ const AuthForm = () => {
                               name="username"
                               value={formData.username}
                               onChange={handleChange}
+                              disabled={submitting || loading}
                               InputProps={{
                                 startAdornment: (
-                                  <AccountCircleIcon sx={{ mr: 1, color: 'action.active' }} />
+                                  <AccountCircleIcon
+                                    sx={{ mr: 1, color: 'action.active' }}
+                                  />
                                 ),
                               }}
                             />
@@ -291,6 +282,7 @@ const AuthForm = () => {
                               onChange={handleChange}
                               multiline
                               rows={3}
+                              disabled={submitting || loading}
                               InputProps={{
                                 startAdornment: (
                                   <DescriptionIcon
@@ -305,7 +297,7 @@ const AuthForm = () => {
                     </Slide>
                   )}
 
-                  {/* Username field (always shown) */}
+                  {/* Username */}
                   <TextField
                     fullWidth
                     label="Username"
@@ -313,6 +305,7 @@ const AuthForm = () => {
                     value={formData.username}
                     onChange={handleChange}
                     required
+                    disabled={submitting || loading}
                     InputProps={{
                       startAdornment: (
                         <AccountCircleIcon sx={{ mr: 1, color: 'action.active' }} />
@@ -320,7 +313,7 @@ const AuthForm = () => {
                     }}
                   />
 
-                  {/* Email field (signup only) */}
+                  {/* Email (signup) */}
                   {!isLogin && (
                     <Slide direction="up" in timeout={500}>
                       <TextField
@@ -331,6 +324,7 @@ const AuthForm = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
+                        disabled={submitting || loading}
                         InputProps={{
                           startAdornment: (
                             <EmailIcon sx={{ mr: 1, color: 'action.active' }} />
@@ -340,7 +334,7 @@ const AuthForm = () => {
                     </Slide>
                   )}
 
-                  {/* Password field */}
+                  {/* Password */}
                   <TextField
                     fullWidth
                     label="Password"
@@ -349,6 +343,7 @@ const AuthForm = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
+                    disabled={submitting || loading}
                     InputProps={{
                       startAdornment: (
                         <LockIcon sx={{ mr: 1, color: 'action.active' }} />
@@ -356,7 +351,7 @@ const AuthForm = () => {
                     }}
                   />
 
-                  {/* Confirm password (signup only) */}
+                  {/* Confirm Password (signup) */}
                   {!isLogin && (
                     <Slide direction="up" in timeout={600}>
                       <TextField
@@ -367,6 +362,7 @@ const AuthForm = () => {
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         required
+                        disabled={submitting || loading}
                         InputProps={{
                           startAdornment: (
                             <LockIcon sx={{ mr: 1, color: 'action.active' }} />
@@ -381,24 +377,29 @@ const AuthForm = () => {
                     variant="contained"
                     fullWidth
                     size="large"
-                    disabled={submitting}
+                    disabled={submitting || loading}
                     sx={{
                       py: 1.8,
                       borderRadius: 2,
                       fontSize: '1rem',
                       background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                      transition: 'background 0.3s',
                       '&:hover': {
                         background: `linear-gradient(135deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
                       },
                     }}
                   >
-                    {isLogin ? 'Sign In' : 'Create Account'}
+                    {submitting || loading
+                      ? isLogin
+                        ? 'Signing In...'
+                        : 'Creating Account...'
+                      : isLogin
+                      ? 'Sign In'
+                      : 'Create Account'}
                   </Button>
                 </Stack>
               </Box>
 
-              {/* Toggle link */}
+              {/* Toggle */}
               <Box mt={4} textAlign="center">
                 <Divider sx={{ borderColor: alpha(theme.palette.text.primary, 0.2) }}>
                   or
@@ -407,6 +408,7 @@ const AuthForm = () => {
                   onClick={handleToggle}
                   variant="text"
                   sx={{ mt: 2, textTransform: 'none', color: theme.palette.text.primary }}
+                  disabled={submitting || loading}
                 >
                   {isLogin
                     ? "Don't have an account? Create one"

@@ -15,6 +15,7 @@ import {
   ListItemText,
   Fade,
   AvatarGroup,
+  useTheme,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -24,21 +25,17 @@ import {
   Archive as ArchiveIcon,
   Circle as CircleIcon,
 } from '@mui/icons-material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { v4 as uuid } from 'uuid';
 
 const formatTime = (isoTime) => {
   if (!isoTime) return '';
-  const date = new Date(isoTime);
-  const diff = Date.now() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return 'now';
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(diff / 3600000);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(diff / 86400000);
-  if (days < 7) return `${days}d`;
-  return date.toLocaleDateString();
+  const diff = Date.now() - new Date(isoTime).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'now';
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(diff / 3600000);
+  return h < 24 ? `${h}h` : new Date(isoTime).toLocaleDateString();
 };
 
 const ChatItem = ({
@@ -57,185 +54,101 @@ const ChatItem = ({
   handleMuteChat,
   handleArchiveChat,
 }) => {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
-  const isMenuOpen = Boolean(anchorEl);
-
   const initials = useMemo(
-    () =>
-      name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase(),
+    () => name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase(),
     [name]
   );
 
   const avatarNode = useMemo(() => {
-    const common = {
-      width: 48,
-      height: 48,
-      border: 2,
-      borderColor: 'background.paper',
-      boxShadow: 1,
-    };
-    if (avatar.length === 1) {
-      return <Avatar src={avatar[0]} sx={common} />;
-    }
+    const base = { width: 40, height: 40 };
+    if (avatar.length === 1) return <Avatar src={avatar[0]} sx={base} />;
     if (avatar.length > 1) {
       return (
-        <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': common }}>
-          {avatar.map((url) => (
-            <Avatar key={uuid()} src={url} />
-          ))}
+        <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': base }}>
+          {avatar.map(url => <Avatar key={uuid()} src={url} />)}
         </AvatarGroup>
       );
     }
-    return <Avatar sx={{ ...common, bgcolor: 'primary.main' }}>{initials}</Avatar>;
-  }, [avatar, initials]);
+    return <Avatar sx={{ ...base, bgcolor: theme.palette.primary.main }}>{initials}</Avatar>;
+  }, [avatar, initials, theme]);
 
-  const onlineIndicator = isOnline && (
-    <Box
-      sx={{
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        width: 12,
-        height: 12,
-        bgcolor: 'success.main',
-        border: 2,
-        borderColor: 'background.paper',
-        borderRadius: '50%',
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: -6,
-          left: -6,
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          border: '2px solid',
-          borderColor: 'success.main',
-          animation: 'pulse 2s infinite ease-in-out',
-        },
-        '@keyframes pulse': {
-          '0%,100%': { transform: 'scale(0.8)', opacity: 0.8 },
-          '50%': { transform: 'scale(1.2)', opacity: 0.3 },
-        },
-      }}
-    />
-  );
-
-  const onMenuOpen = (e) => {
-    e.preventDefault();
-    setAnchorEl(e.currentTarget);
-  };
-  const onMenuClose = () => setAnchorEl(null);
-
-  const onAction = (action) => {
-    onMenuClose();
-    switch (action) {
-      case 'pin':
-        return handlePinChat(_id);
-      case 'mute':
-        return handleMuteChat(_id);
-      case 'archive':
-        return handleArchiveChat(_id);
-      case 'delete':
-        return handleDeleteChatOpen(_id);
-      default:
-        return;
-    }
+  const openMenu = e => { e.preventDefault(); setAnchorEl(e.currentTarget); };
+  const closeMenu = () => setAnchorEl(null);
+  const onAction = action => {
+    closeMenu();
+    if (action === 'pin') handlePinChat(_id);
+    if (action === 'mute') handleMuteChat(_id);
+    if (action === 'archive') handleArchiveChat(_id);
+    if (action === 'delete') handleDeleteChatOpen(_id);
   };
 
   return (
     <NavLink to={`/chat/${_id}`} style={{ textDecoration: 'none' }}>
       {({ isActive }) => (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: 'tween', duration: 0.2 }}
-        >
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
           <Box
-            onMouseLeave={() => setAnchorEl(null)}
+            onMouseLeave={closeMenu}
             sx={{
               display: 'flex',
               alignItems: 'center',
-              p: 2,
+              p: 1.5,
               mb: 1,
-              bgcolor: isActive ? 'primary.light' : 'background.paper',
-              borderRadius: 2,
-              boxShadow: isActive ? 3 : 1,
-              position: 'relative',
+              bgcolor: isActive ? theme.palette.action.selected : theme.palette.background.paper,
+              borderRadius: 1,
             }}
           >
-            <Box sx={{ position: 'relative', mr: 2 }}>
+            <Box sx={{ mr: 2, position: 'relative' }}>
               {avatarNode}
-              {onlineIndicator}
+              {isOnline && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    width: 8,
+                    height: 8,
+                    bgcolor: theme.palette.success.main,
+                    borderRadius: '50%',
+                  }}
+                />
+              )}
             </Box>
 
-            <Stack sx={{ flex: 1, minWidth: 0 }} spacing={0.5}>
+            <Stack sx={{ flex: 1 }} spacing={0.4}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography noWrap fontWeight={600} flex={1}>
+                <Typography noWrap fontWeight={600} flex={1} variant="subtitle2">
                   {name}
                 </Typography>
-                {isPinned && (
-                  <Tooltip title="Pinned">
-                    <PushPinIcon fontSize="small" sx={{ ml: 1 }} />
-                  </Tooltip>
-                )}
-                {isMuted && (
-                  <Tooltip title="Muted">
-                    <VolumeOffIcon fontSize="small" sx={{ ml: 1 }} />
-                  </Tooltip>
-                )}
+                {isPinned && <PushPinIcon fontSize="small" sx={{ ml: 0.5 }} />}
+                {isMuted && <VolumeOffIcon fontSize="small" sx={{ ml: 0.5, opacity: 0.6 }} />}
               </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography noWrap color="text.secondary" flex={1}>
-                  {isTyping ? 'typing...' : lastMessage}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography noWrap color="text.secondary" flex={1} variant="body2">
+                  {isTyping ? 'typing…' : lastMessage}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
                   {isTyping ? '' : formatTime(lastMessageTime)}
                 </Typography>
                 {newMessage > 0 && (
-                  <Chip label={newMessage > 99 ? '99+' : newMessage} size="small" />
+                  <Chip label={newMessage > 99 ? '99+' : newMessage} size="small" sx={{ ml: 1, height: 20 }} />
                 )}
               </Box>
             </Stack>
 
-            <AnimatePresence>
-              {(anchorEl || !isActive) && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <IconButton size="small" onClick={onMenuOpen} sx={{ ml: 1 }}>
-                    <MoreVertIcon fontSize="small" />
-                  </IconButton>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <IconButton size="small" onClick={openMenu} sx={{ ml: 1 }}>
+              <MoreVertIcon fontSize="small" />
+            </IconButton>
 
-            <Menu
-              anchorEl={anchorEl}
-              open={isMenuOpen}
-              onClose={onMenuClose}
-              TransitionComponent={Fade}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              {['pin', 'mute', 'archive', 'delete'].map((action) => {
-                const Icon = {
-                  pin: PushPinIcon,
-                  mute: VolumeOffIcon,
-                  archive: ArchiveIcon,
-                  delete: DeleteIcon,
-                }[action];
-                const label = action === 'delete' ? 'Delete' : action.charAt(0).toUpperCase() + action.slice(1);
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeMenu} TransitionComponent={Fade}>
+              {['pin','mute','archive','delete'].map(action => {
+                const IconComp = { pin: PushPinIcon, mute: VolumeOffIcon, archive: ArchiveIcon, delete: DeleteIcon }[action];
                 return (
                   <MenuItem key={action} onClick={() => onAction(action)}>
-                    <ListItemIcon><Icon fontSize="small" color={action === 'delete' ? 'error' : 'inherit'} /></ListItemIcon>
-                    <ListItemText primary={label} />
+                    <ListItemIcon><IconComp fontSize="small" /></ListItemIcon>
+                    <ListItemText primary={action.charAt(0).toUpperCase() + action.slice(1)} />
                   </MenuItem>
                 );
               })}

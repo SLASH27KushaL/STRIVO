@@ -12,6 +12,7 @@ import chat_Route from './routes/chat_route.js';
 import { connectDB } from './utils/features.js';
 import { NEW_MESSAGE } from './constants/events.js';
 import { Message } from './models/message.js';
+import { corsOptions } from './constants/config.js';
 
 export const userSocketIDs = new Map();
 
@@ -30,6 +31,7 @@ connectDB(process.env.MONGO_URI);
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(corsOptions)
 // only allow our frontend on port 5173
 app.use(
   cors({
