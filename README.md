@@ -1,7 +1,4 @@
-﻿# STRIVO
 
-
-STRIVO
 STRIVO is a modern, real-time chat application built to facilitate seamless communication. It features private messaging, group chats, multimedia sharing, and an administrative dashboard for analytics. Built with the MERN stack and powered by Socket.io for instant data transfer.
 
 🚀 Features
@@ -45,4 +42,5 @@ Real-time Engine: Socket.io
 Authentication: JWT (jsonwebtoken), cookie-parser, bcrypt
 
 File Storage: Cloudinary (with Multer)
+
 
