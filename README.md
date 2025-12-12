@@ -1,7 +1,5 @@
 ﻿# STRIVO
-Based on the code files provided, specifically the client and server directories and their package.json files, here is a comprehensive README.md file for the STRIVO repository.
 
-This project appears to be a Real-Time Chat Application built using the MERN stack (MongoDB, Express, React, Node.js) with Socket.io.
 
 STRIVO
 STRIVO is a modern, real-time chat application built to facilitate seamless communication. It features private messaging, group chats, multimedia sharing, and an administrative dashboard for analytics. Built with the MERN stack and powered by Socket.io for instant data transfer.
@@ -47,3 +45,4 @@ Real-time Engine: Socket.io
 Authentication: JWT (jsonwebtoken), cookie-parser, bcrypt
 
 File Storage: Cloudinary (with Multer)
+
